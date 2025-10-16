@@ -1,19 +1,33 @@
-# 1. Base Image: Start with an official, lightweight Python image
+# --- Stage 1: The Builder ---
+# This stage downloads the large model files
+FROM python:3.10-slim as builder
+
+# Install sentence-transformers
+RUN pip install sentence-transformers
+
+# This command runs a python script that downloads the model into a specific folder
+# This 'warms up' the cache.
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2', cache_folder='/model_cache')"
+
+
+# --- Stage 2: The Final Image ---
+# This is the small, efficient image we will actually deploy
 FROM python:3.10-slim
 
-# 2. Set the working directory inside the container
 WORKDIR /app
 
-# 3. Copy and install dependencies first to leverage Docker's layer caching
+# Copy and install dependencies from requirements.txt
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && rm -rf /root/.cache/pip
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 4. Copy the rest of your application's source code
+# Copy the application source code
 COPY ./src ./src
 
-# 5. Expose the port the FastAPI server will run on
+# Copy the pre-downloaded model from the builder stage
+COPY --from=builder /model_cache /root/.cache/torch/sentence_transformers
+
+# Expose the port the FastAPI server will run on
 EXPOSE 8000
 
-# 6. Command to run the application when the container starts
-# We use --host 0.0.0.0 to make the server accessible from outside the container
+# Command to run the application
 CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
