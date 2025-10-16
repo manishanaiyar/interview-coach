@@ -1,12 +1,11 @@
-# --- Stage 1: The Builder ---
-# This stage downloads the large model files
-FROM python:3.10-slim as builder
+# --- Stage 1: The Builder (Optimized) ---
+# This stage installs dependencies and cleans up in the same step
+FROM python:3.10-slim AS builder
 
-# Install sentence-transformers
-RUN pip install sentence-transformers
+# Install sentence-transformers and immediately clear the cache to save space
+RUN pip install sentence-transformers && rm -rf /root/.cache/pip
 
-# This command runs a python script that downloads the model into a specific folder
-# This 'warms up' the cache.
+# This command downloads the model into a specific folder
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2', cache_folder='/model_cache')"
 
 
@@ -18,7 +17,7 @@ WORKDIR /app
 
 # Copy and install dependencies from requirements.txt
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && rm -rf /root/.cache/pip
 
 # Copy the application source code
 COPY ./src ./src
