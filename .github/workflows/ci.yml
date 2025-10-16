@@ -32,7 +32,7 @@ jobs:
       # This step just confirms the app can import modules correctly
       - name: Run tests with pytest
         run: |
-          pytest
+          python -m pytest
 
       # Step 5: Build the Docker image
       - name: Build Docker image
