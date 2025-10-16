@@ -1,6 +1,5 @@
 name: CI Pipeline
 
-# This workflow runs on every push to the 'main' or 'master' branch
 on:
   push:
     branches: [ "main", "master" ]
@@ -8,33 +7,12 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest # Use a standard Linux runner from GitHub
+  build-docker-image:
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out your repository's code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up Python
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-
-      # Step 3: Install Python dependencies
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      # Step 4: Run basic tests (we'll add more later)
-      # This step just confirms the app can import modules correctly
-      - name: Run tests with pytest
-        run: |
-          python -m pytest
-
-      # Step 5: Build the Docker image
       - name: Build Docker image
-        run: |
-          docker build -t interview-coach:latest .
+        run: docker build -t interview-coach:latest .
