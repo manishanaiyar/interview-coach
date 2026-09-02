@@ -3,7 +3,7 @@ uvicorn[standard]
 streamlit
 pydantic
 python-dotenv
-sentence-transformers
+sentence-transformers>=2.7,<3
 faiss-cpu
 PyMuPDF
 python-docx
