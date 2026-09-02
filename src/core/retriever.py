@@ -54,6 +54,8 @@ class Retriever:
         
         # Search the FAISS index for the k nearest neighbors
         distances, indices = self.index.search(np.array(query_embedding, dtype=np.float32), k)
-        
-        # Return the actual text chunks corresponding to the top indices
-        return [self.text_chunks[i] for i in indices[0]]
+
+        # FAISS pads missing results with -1 when there are fewer indexed
+        # chunks than k. Filter those out instead of silently wrapping
+        # around to the last chunk via negative indexing.
+        return [self.text_chunks[i] for i in indices[0] if i != -1]

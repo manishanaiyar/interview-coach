@@ -14,7 +14,13 @@ def chunk_text(text: str, chunk_size: int = 1000, chunk_overlap: int = 200) -> L
     """
     if not isinstance(text, str):
         raise TypeError("Input text must be a string.")
-    
+
+    if chunk_overlap >= chunk_size:
+        raise ValueError("chunk_overlap must be smaller than chunk_size, otherwise chunking never advances.")
+
+    if not text:
+        return []
+
     chunks = []
     start_index = 0
     while start_index < len(text):
